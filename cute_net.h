@@ -157,7 +157,7 @@
 
 
 	EXAMPLES
-	
+
 		Here is a full example of a client and server, where the client sends a string to the
 		server to print to the console.
 
@@ -245,7 +245,8 @@ typedef struct cn_crypto_signature_t { uint8_t bytes[64]; } cn_crypto_signature_
 #ifdef __cplusplus
 #	define CN_INLINE inline
 #else
-#	define CN_INLINE static inline
+//#	define CN_INLINE static inline
+#	define CN_INLINE
 #endif
 
 //--------------------------------------------------------------------------------------------------
@@ -302,7 +303,7 @@ void cn_crypto_sign_keygen(cn_crypto_sign_public_t* public_key, cn_crypto_sign_s
 /**
  * Generates a connect token, useable by clients to authenticate and securely connect to
  * a server. You can use this function whenever a validated client wants to join your game servers.
- * 
+ *
  * It's recommended to setup a web service specifically for allowing players to authenticate
  * themselves (login). Once authenticated, the webservice can call this function and hand
  * the connect token to the client. The client can then read the public section of the
@@ -372,20 +373,20 @@ void cn_client_free_packet(cn_client_t* client, void* packet);
 /**
  * Sends a packet to the server. If the packet size is too large (over 1k bytes) it will be split up
  * and sent in smaller chunks.
- * 
+ *
  * `send_reliably` as true means the packet will be sent reliably an in-order relative to other
  * reliable packets. Under packet loss the packet will continually be sent until an acknowledgement
  * from the server is received. False means to send a typical UDP packet, with no special mechanisms
  * regarding packet loss.
- * 
+ *
  * Reliable packets are significantly more expensive than unreliable packets, so try to send any data
  * that can be lost due to packet loss as an unreliable packet. Of course, some packets are required
  * to be sent, and so reliable is appropriate. As an optimization some kinds of data, such as frequent
  * transform updates, can be sent unreliably.
- * 
+ *
  * Will return an error result if the packet cannot be queued up for some reason. This typically means
  * you are sending way too much data to the other end and need to slow down.
- * 
+ *
  * IMPORTANT NOTE -- If you send reliable packets you _MUST_ be sending packets both to the server
  *                   and to the client. Two-way communication is required. If you only send reliable
  *                   packets one-way, it will never hear back from the other end whether or not those
@@ -411,7 +412,7 @@ typedef enum cn_client_state_t
 } cn_client_state_t;
 
 cn_client_state_t cn_client_state_get(const cn_client_t* client);
-const char* cn_client_state_string(cn_client_state_t state); 
+const char* cn_client_state_string(cn_client_state_t state);
 void cn_client_enable_network_simulator(cn_client_t* client, double latency, double jitter, double drop_chance, double duplicate_chance);
 float cn_client_get_packet_loss_estimate(cn_client_t* client);
 float cn_client_get_rtt_estimate(cn_client_t* client);
@@ -459,7 +460,7 @@ void cn_server_destroy(cn_server_t* server);
 
 /**
  * Starts up the server, ready to receive new client connections.
- * 
+ *
  * Please note that not all users will be able to access an ipv6 server address, so it might
  * be good to also provide a way to connect through ipv4.
  */
@@ -512,20 +513,20 @@ void cn_server_disconnect_client(cn_server_t* server, int client_index, bool not
 /**
  * Sends a packet to the client. If the packet size is too large (over 1k bytes) it will be split up
  * and sent in smaller chunks.
- * 
+ *
  * `send_reliably` as true means the packet will be sent reliably an in-order relative to other
  * reliable packets. Under packet loss the packet will continually be sent until an acknowledgement
  * from the client is received. False means to send a typical UDP packet, with no special mechanisms
  * regarding packet loss.
- * 
+ *
  * Reliable packets are significantly more expensive than unreliable packets, so try to send any data
  * that can be lost due to packet loss as an unreliable packet. Of course, some packets are required
  * to be sent, and so reliable is appropriate. As an optimization some kinds of data, such as frequent
  * transform updates, can be sent unreliably.
- * 
+ *
  * Will return an error result if the packet cannot be queued up for some reason. This typically means
  * you are sending way too much data to the other end and need to slow down.
- * 
+ *
  * IMPORTANT NOTE -- If you send reliable packets you _MUST_ be sending packets both to the server
  *                   and to the client. Two-way communication is required. If you only send reliable
  *                   packets one-way, it will never hear back from the other end whether or not those
@@ -539,17 +540,17 @@ bool cn_server_is_client_connected(cn_server_t* server, int client_index);
 
 /**
  * WARNING -- For test/dev builds only!
- * 
+ *
  * If your server runs in the cloud with a public ip (highly recommended) this function is not at all necessary. However,
  * for testing purposes a lot of developers want to start out with port forwarding on their personal machine. Unfortunately
  * routers nowadays will likely act as your public IP. The connect token a client uses must use the router's IP address. As
  * the token is opened up by the server the server will notice it's local IP (something like 192.168.1.3) will not match the
  * the server's public ip listed in the connect token, causing a disconnect.
- * 
+ *
  * Instead you may specify the server to match against it's *local IP*, instead of the public IP. This of course compromises
  * the entire security design, but it's a great way to get going before learning how to setup a proper dedicated server with
  * a real public IP address.
- * 
+ *
  * For some more info/context you can see the original GitHub issue on this topic: https://github.com/RandyGaul/cute_headers/issues/344
  */
 void cn_server_set_public_ip(cn_server_t* server, const char* address_and_port);
@@ -4282,7 +4283,7 @@ void cn_write_endpoint(uint8_t** p, cn_endpoint_t endpoint)
 		cn_write_uint16(p, endpoint.u.ipv6[5]);
 		cn_write_uint16(p, endpoint.u.ipv6[6]);
 		cn_write_uint16(p, endpoint.u.ipv6[7]);
-	} 
+	}
 #endif
 	else {
 		CN_ASSERT(0);
@@ -4872,8 +4873,8 @@ void cn_endpoint_to_string(cn_endpoint_t endpoint, char* buffer, int buffer_size
 			inet_ntop(AF_INET6, (void*)ipv6_network_order, buffer, INET6_ADDRSTRLEN);
 			CN_SNPRINTF(buffer, CN_ENDPOINT_STRING_MAX_LENGTH, "[%s]:%d", buffer, endpoint.port);
 		}
-	} 
-	else 
+	}
+	else
 #endif
 	if (endpoint.type == CN_ADDRESS_TYPE_IPV4) {
 		if (endpoint.port != 0) {
@@ -4904,13 +4905,13 @@ int cn_endpoint_equals(cn_endpoint_t a, cn_endpoint_t b)
 		for (int i = 0; i < 4; ++i)
 			if (a.u.ipv4[i] != b.u.ipv4[i])
 				return 0;
-	} 
+	}
 #ifndef CUTE_NET_NO_IPV6
 	else if (a.type == CN_ADDRESS_TYPE_IPV6) {
 		for (int i = 0; i < 8; ++i)
 			if (a.u.ipv6[i] != b.u.ipv6[i])
 				return 0;
-	} 
+	}
 #endif
 	else {
 		return 0;
@@ -5174,7 +5175,7 @@ int cn_socket_send_internal(cn_socket_t* socket, cn_endpoint_t send_to, const vo
 		int result = sendto(socket->handle, (const char*)data, byte_count, 0, (struct sockaddr*)&socket_address, sizeof(socket_address));
 		return result;
 	}
-	else 
+	else
 #endif
 	if (endpoint.type == CN_ADDRESS_TYPE_IPV4) {
 		struct sockaddr_in socket_address;
@@ -10424,7 +10425,7 @@ cn_result_t cn_test_transport_send_packet_fn(int index, void* packet, int size, 
 	if (data->drop_packet) {
 		return cn_error_success();
 	}
-	
+
 	if (data->id) {
 		cn_transport_process_packet(data->transport_a, packet, size);
 	} else {
@@ -10653,7 +10654,7 @@ int cn_transport_drop_fragments_reliable_hammer()
 		if (!cn_is_error(cn_transport_receive_fire_and_forget(transport_b, &data, &size))) {
 			cn_transport_free_packet(transport_b, data);
 		}
-	
+
 		if (received && cn_transport_unacked_fragment_count(transport_a) == 0) {
 			break;
 		}
@@ -10733,7 +10734,7 @@ int cn_transport_send_many_reliables_at_once()
 				CN_TEST_ASSERT(false);
 			}
 		}
-	
+
 		if (done && cn_transport_unacked_fragment_count(transport_a) == 0) {
 			break;
 		}
@@ -12285,7 +12286,7 @@ int cn_run_tests(int which_test, bool soak)
 		CN_TEST_CASE_ENTRY(cn_protocol_multiple_connections_and_payloads),
 		CN_TEST_CASE_ENTRY(cn_protocol_client_reconnect),
 	};
-	
+
 	int test_count = sizeof(tests) / sizeof(*tests);
 	int fail_count = 0;
 
@@ -12351,20 +12352,20 @@ break_soak:
 	------------------------------------------------------------------------------
 	ALTERNATIVE B - Public Domain (www.unlicense.org)
 	This is free and unencumbered software released into the public domain.
-	Anyone is free to copy, modify, publish, use, compile, sell, or distribute this 
-	software, either in source code form or as a compiled binary, for any purpose, 
+	Anyone is free to copy, modify, publish, use, compile, sell, or distribute this
+	software, either in source code form or as a compiled binary, for any purpose,
 	commercial or non-commercial, and by any means.
-	In jurisdictions that recognize copyright laws, the author or authors of this 
-	software dedicate any and all copyright interest in the software to the public 
-	domain. We make this dedication for the benefit of the public at large and to 
-	the detriment of our heirs and successors. We intend this dedication to be an 
-	overt act of relinquishment in perpetuity of all present and future rights to 
+	In jurisdictions that recognize copyright laws, the author or authors of this
+	software dedicate any and all copyright interest in the software to the public
+	domain. We make this dedication for the benefit of the public at large and to
+	the detriment of our heirs and successors. We intend this dedication to be an
+	overt act of relinquishment in perpetuity of all present and future rights to
 	this software under copyright law.
-	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-	AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN 
-	ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+	AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+	ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 	WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	------------------------------------------------------------------------------
 */
